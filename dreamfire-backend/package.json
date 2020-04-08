@@ -1,0 +1,24 @@
+{
+  "name": "dreamfire-backend",
+  "version": "1.0.0",
+  "description": "Backend functionality for dreamfire framework",
+  "main": "index.js",
+  "scripts": {
+    "build": "rm -rf ./dist && tsc && cp ./package.json ./dist/",
+    "build:dev": "tsc && cp ./package.json ./dist/"
+  },
+  "files": [
+    "**/*.js"
+  ],
+  "author": "Darnell Andries",
+  "license": "MIT",
+  "dependencies": {
+    "@types/jsonwebtoken": "^8.3.9",
+    "apollo-server": "^2.12.0",
+    "graphql": "^14.6.0",
+    "jsonwebtoken": "^8.5.1"
+  },
+  "devDependencies": {
+    "typescript": "^3.8.3"
+  }
+}
