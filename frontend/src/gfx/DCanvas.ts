@@ -74,11 +74,13 @@ export default class DCanvas {
     }
   }
 
-  private convertCoordsToPixels(drawCoords : DCoords) {
-    drawCoords.x = (window.innerWidth / 2.0) + (drawCoords.x * this.viewportInfo.coordPixelScale)
-    drawCoords.y = (window.innerHeight / 2.0) + (drawCoords.y * this.viewportInfo.coordPixelScale)
-    drawCoords.width = drawCoords.width * this.viewportInfo.coordPixelScale
-    drawCoords.height = drawCoords.height * this.viewportInfo.coordPixelScale
+  private convertCoordsToPixels(drawCoords : DCoords) : DCoords {
+    return {
+      x: (window.innerWidth / 2.0) + (drawCoords.x * this.viewportInfo.coordPixelScale),
+      y: (window.innerHeight / 2.0) + (drawCoords.y * this.viewportInfo.coordPixelScale),
+      width: drawCoords.width * this.viewportInfo.coordPixelScale,
+      height: drawCoords.height * this.viewportInfo.coordPixelScale
+    }
   }
 
   private convertPixelsToCoords(pixels : DCoords) {
@@ -100,12 +102,41 @@ export default class DCanvas {
 
     this.ctx.setLineDash([drawProps.lineDash || 0])
 
-    this.convertCoordsToPixels(drawCoords)
+    drawCoords = this.convertCoordsToPixels(drawCoords)
     if (drawMode == DrawMode.Fill || drawMode == DrawMode.StrokeAndFill) {
       this.ctx.fillRect(drawCoords.x, drawCoords.y, drawCoords.width, drawCoords.height)
     }
     if (drawMode == DrawMode.Stroke || drawMode == DrawMode.StrokeAndFill) {
       this.ctx.strokeRect(drawCoords.x, drawCoords.y, drawCoords.width, drawCoords.height)
+    }
+  }
+
+  drawRoundedRect(drawCoords : DCoords, drawMode : DrawMode, radius : number, drawProps : DrawProps = {}) {
+    this.setDrawProps(drawProps)
+
+    this.ctx.setLineDash([drawProps.lineDash || 0])
+
+    drawCoords = this.convertCoordsToPixels(drawCoords)
+    const radiusPixels = this.viewportInfo.coordPixelScale * radius
+    
+    this.ctx.beginPath()
+    this.ctx.moveTo(drawCoords.x + radiusPixels, drawCoords.y)
+    this.ctx.lineTo(drawCoords.x + drawCoords.width - radiusPixels, drawCoords.y)
+    this.ctx.quadraticCurveTo(drawCoords.x + drawCoords.width, drawCoords.y, drawCoords.x + drawCoords.width, drawCoords.y + radiusPixels)
+    this.ctx.lineTo(drawCoords.x + drawCoords.width, drawCoords.y + drawCoords.height - radiusPixels)
+    this.ctx.quadraticCurveTo(drawCoords.x + drawCoords.width, drawCoords.y + drawCoords.height,
+      drawCoords.x + drawCoords.width - radiusPixels, drawCoords.y + drawCoords.height)
+    this.ctx.lineTo(drawCoords.x + radiusPixels, drawCoords.y + drawCoords.height)
+    this.ctx.quadraticCurveTo(drawCoords.x, drawCoords.y + drawCoords.height, drawCoords.x, drawCoords.y + drawCoords.height - radiusPixels)
+    this.ctx.lineTo(drawCoords.x, drawCoords.y + radiusPixels)
+    this.ctx.quadraticCurveTo(drawCoords.x, drawCoords.y, drawCoords.x + radiusPixels, drawCoords.y)
+    this.ctx.closePath()
+
+    if (drawMode == DrawMode.Fill || drawMode == DrawMode.StrokeAndFill) {
+      this.ctx.fill()
+    }
+    if (drawMode == DrawMode.Stroke || drawMode == DrawMode.StrokeAndFill) {
+      this.ctx.stroke()
     }
   }
 
@@ -118,7 +149,7 @@ export default class DCanvas {
         return v
       }).join(' ')
     }
-    this.convertCoordsToPixels(drawCoords)
+    drawCoords = this.convertCoordsToPixels(drawCoords)
 
     this.setDrawProps(drawProps)
     
@@ -130,7 +161,7 @@ export default class DCanvas {
   }
 
   clearRect(drawCoords : DCoords) {
-    this.convertCoordsToPixels(drawCoords)
+    drawCoords = this.convertCoordsToPixels(drawCoords)
     this.ctx.clearRect(drawCoords.x, drawCoords.y, drawCoords.width, drawCoords.height)
   }
 }
