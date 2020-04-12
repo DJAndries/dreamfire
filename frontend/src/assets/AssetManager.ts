@@ -40,10 +40,20 @@ export default class AssetManager {
     asset.data = audio
   }
 
+  private initImage(asset: Asset) {
+    const img = new Image()
+    img.onload = this.assetPreloaded.bind(this)
+    img.src = asset.url
+    asset.data = img
+  }
+
   private initData(asset: Asset) {
     switch (asset.type) {
       case AssetType.Audio:
         this.initAudio(asset)
+        break
+      case AssetType.Image:
+        this.initImage(asset)
         break
     }
   }

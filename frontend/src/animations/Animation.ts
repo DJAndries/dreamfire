@@ -5,5 +5,4 @@ export default interface Animation {
 
   update(interval : number) : boolean
 
-  getAnimationData() : any
 }

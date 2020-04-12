@@ -2,6 +2,7 @@ import { DCoords, CanvasMouseEvent, DrawProps, MouseEventType, DrawMode } from "
 import DUIControl from "./DUIControl"
 import { DUIEvent, DUIEventType } from "./events"
 import BaseGameContext from "../ctx/BaseGameContext"
+import { testPointWithinBox } from "../util"
 
 const DEFAULT_BUTTON_COLOR = '#1976d2'
 
@@ -27,8 +28,7 @@ export default class DUIButton extends DUIControl {
     if (!this.active || ev.type !== MouseEventType.Click) {
       return null
     }
-    if (ev.coords.x >= this.coords.x && ev.coords.y >= this.coords.y &&
-      ev.coords.x <= (this.coords.x + this.coords.width) && ev.coords.y <= (this.coords.y + this.coords.height)) {
+    if (testPointWithinBox(ev.coords, this.coords)) {
       return {
         type: DUIEventType.Click,
         controlId: null,

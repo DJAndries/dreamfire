@@ -103,12 +103,17 @@ export default class DCanvas {
     this.ctx.setLineDash([drawProps.lineDash || 0])
 
     drawCoords = this.convertCoordsToPixels(drawCoords)
-    if (drawMode == DrawMode.Fill || drawMode == DrawMode.StrokeAndFill) {
-      this.ctx.fillRect(drawCoords.x, drawCoords.y, drawCoords.width, drawCoords.height)
-    }
     if (drawMode == DrawMode.Stroke || drawMode == DrawMode.StrokeAndFill) {
       this.ctx.strokeRect(drawCoords.x, drawCoords.y, drawCoords.width, drawCoords.height)
     }
+    if (drawMode == DrawMode.Fill || drawMode == DrawMode.StrokeAndFill) {
+      this.ctx.fillRect(drawCoords.x, drawCoords.y, drawCoords.width, drawCoords.height)
+    }
+  }
+
+  drawImage(drawCoords : DCoords, image : HTMLImageElement) {
+    drawCoords = this.convertCoordsToPixels(drawCoords)
+    this.ctx.drawImage(image, drawCoords.x, drawCoords.y, drawCoords.width, drawCoords.height)
   }
 
   drawRoundedRect(drawCoords : DCoords, drawMode : DrawMode, radius : number, drawProps : DrawProps = {}) {
@@ -135,6 +140,7 @@ export default class DCanvas {
     if (drawMode == DrawMode.Fill || drawMode == DrawMode.StrokeAndFill) {
       this.ctx.fill()
     }
+
     if (drawMode == DrawMode.Stroke || drawMode == DrawMode.StrokeAndFill) {
       this.ctx.stroke()
     }
@@ -154,6 +160,29 @@ export default class DCanvas {
     this.setDrawProps(drawProps)
     
     this.ctx.fillText(text, drawCoords.x, drawCoords.y)
+  }
+
+  drawCircle(drawCoords: DCoords, drawMode : DrawMode, drawProps: DrawProps = {}) {
+    this.setDrawProps(drawProps)
+
+    this.ctx.setLineDash([drawProps.lineDash || 0])
+
+    drawCoords = this.convertCoordsToPixels(drawCoords)
+    const radius = drawCoords.width / 2
+
+    this.ctx.beginPath()
+    this.ctx.moveTo(drawCoords.x + drawCoords.width, drawCoords.y + radius)
+    this.ctx.arc(drawCoords.x + radius, drawCoords.y + radius,
+      drawCoords.width / 2, 0, 2 * Math.PI)
+    this.ctx.closePath()
+
+    if (drawMode == DrawMode.Fill || drawMode == DrawMode.StrokeAndFill) {
+      this.ctx.fill()
+    }
+    if (drawMode == DrawMode.Stroke || drawMode == DrawMode.StrokeAndFill) {
+      this.ctx.stroke()
+    }
+    
   }
 
   clear() {

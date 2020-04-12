@@ -1,7 +1,7 @@
-import Animation from "./Animation"
-import { DrawProps } from "../gfx/types"
+import Effect from "./Effect"
+import { DrawProps } from "../gfx/types";
 
-export default class DrawPropsAnimation implements Animation {
+export default class DrawPropsEffect implements Effect {
 
   private startDrawProps : DrawProps
 
@@ -9,27 +9,21 @@ export default class DrawPropsAnimation implements Animation {
 
   private currentDrawProps : DrawProps
 
-  private duration : number
-
-  private timeElapsed : number = 0
-
-  additionalInfo: any
-
-  constructor(startDrawProps : DrawProps, endDrawProps : DrawProps, duration: number, additionalInfo : any) {
+  constructor(startDrawProps : DrawProps, endDrawProps : DrawProps) {
     this.startDrawProps = startDrawProps
     this.endDrawProps = endDrawProps
     this.currentDrawProps = Object.assign({}, startDrawProps)
-    this.duration = duration
-    this.additionalInfo = additionalInfo
   }
 
-  update(interval: number): boolean {
-    this.timeElapsed += interval
-    const progress = Math.min(1, this.timeElapsed / this.duration)
+  getEffectData() {
+    return this.currentDrawProps
+  }
+
+  update(timeElapsed: number, duration : number, interval : number) {
+    const progress = Math.min(1, timeElapsed / duration)
     this.updateProp('shadowBlur', progress)
     this.updateProp('lineWidth', progress)
     this.updateProp('lineDash', progress)
-    return this.timeElapsed < this.duration
   }
 
   private updateProp(field : string, progress : number) {
@@ -40,7 +34,4 @@ export default class DrawPropsAnimation implements Animation {
     }
   }
 
-  getAnimationData() {
-    return this.currentDrawProps
-  }
 }
