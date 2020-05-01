@@ -18,13 +18,14 @@ export default class DreamfireGame {
     this.baseCtx.currentStage.draw()
   }
 
-  protected initAssets(assets : object) {
-    this.baseCtx.assetManager = new AssetManager(assets)
+  protected initAssets(assets : object, onPreload : () => void = null, onProgress : (loaded : number, total : number) => void = null) {
+    this.baseCtx.assetManager = new AssetManager(assets, onPreload, onProgress)
   }
 
   private initAuxEvents() {
     window.addEventListener('resize', this.resizeHandler.bind(this))
-    window.addEventListener('keyup', this.keyboardHandler.bind(this))
+    window.addEventListener('keyup', (ev) => this.keyboardHandler(ev, false))
+    window.addEventListener('keydown', (ev) => this.keyboardHandler(ev, true))
   }
 
   protected async initCommClient(hostAndPort : string = null, secure : boolean = false) {
@@ -36,9 +37,9 @@ export default class DreamfireGame {
     await this.baseCtx.commClient.init()
   }
 
-  protected initCanvas(fixedCoordSpace : DCoords = null) {
+  protected initCanvas(fixedCoordSpace : DCoords = null, layerCount : number = 1) {
     this.baseCtx.dCanvas = new DCanvas(fixedCoordSpace, this.mouseHandler.bind(this))
-    this.baseCtx.dCanvas.init()
+    this.baseCtx.dCanvas.init(layerCount)
   }
 
   protected initUpdateInterval(interval : number = 20) {
@@ -53,8 +54,8 @@ export default class DreamfireGame {
     this.baseCtx.currentStage.onMouseEvent(ev)
   }
 
-  keyboardHandler(ev : KeyboardEvent) {
-    this.baseCtx.currentStage.onKeyboardEvent(ev)
+  keyboardHandler(ev : KeyboardEvent, isDown : boolean) {
+    this.baseCtx.currentStage.onKeyboardEvent(ev, isDown)
   }
 
   changeStage(stage : Stage) {

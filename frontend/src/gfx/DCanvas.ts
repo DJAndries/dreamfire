@@ -2,9 +2,9 @@ import { ViewportInfo, DCoords, MouseEventType, CanvasMouseEvent, DrawProps, Dra
 
 export default class DCanvas {
 
-  canvas : HTMLCanvasElement
+  canvases : HTMLCanvasElement[] = []
 
-  ctx : CanvasRenderingContext2D
+  ctxs : CanvasRenderingContext2D[] = []
 
   viewportInfo : ViewportInfo
 
@@ -17,21 +17,24 @@ export default class DCanvas {
     this.mouseEventCallback = mouseEventCallback
   }
 
-  init() {
-    this.canvas = document.createElement('canvas')
-    this.canvas.style.width = '100%'
-    this.canvas.style.height = '100%'
-    this.canvas.style.position = 'absolute'
-    this.canvas.style.top = '0'
-    this.canvas.style.left = '0'
-    document.body.appendChild(this.canvas)
+  init(layers : number = 1) {
+    for (let i = 0; i < layers; i++) {
+      const canvas = document.createElement('canvas')
+      canvas.style.width = '100%'
+      canvas.style.height = '100%'
+      canvas.style.position = 'fixed'
+      canvas.style.top = '0'
+      canvas.style.left = '0'
+      canvas.style.zIndex = (layers - i - 1).toString()
+      document.body.appendChild(canvas)
 
-    this.ctx = this.canvas.getContext('2d')
-    this.ctx.globalCompositeOperation = 'destination-over'
+      this.canvases.push(canvas)
+      this.ctxs.push(canvas.getContext('2d'))
+      this.ctxs[i].globalCompositeOperation = 'destination-over'
+    }
+    window.addEventListener('click', (ev) => this.handleEvent(MouseEventType.Click, ev))
+    window.addEventListener('mousemove', (ev) => this.handleEvent(MouseEventType.MouseMove, ev))
     this.updateViewportInfo()
-    
-    this.canvas.addEventListener('click', (ev) => this.handleEvent(MouseEventType.Click, ev))
-    this.canvas.addEventListener('mousemove', (ev) => this.handleEvent(MouseEventType.MouseMove, ev))
   }
 
   private handleEvent(eventType : MouseEventType, ev : MouseEvent) {
@@ -63,9 +66,10 @@ export default class DCanvas {
     }
 
     coordPixelScale = (coordWidth / coordHeight) < (window.innerWidth / window.innerHeight) ? (window.innerHeight / coordHeight) : (window.innerWidth / coordWidth)
-
-    this.canvas.width = window.innerWidth
-    this.canvas.height = window.innerHeight
+    this.canvases.forEach(c => {
+      c.width = window.innerWidth
+      c.height = window.innerHeight
+    })
 
     this.viewportInfo = {
       coordHeight,
@@ -89,60 +93,66 @@ export default class DCanvas {
     pixels.width = pixels.width / this.viewportInfo.coordPixelScale
     pixels.height = pixels.height / this.viewportInfo.coordPixelScale
   }
+
+  private getLayerCtx(index : number) {
+    return this.ctxs[index || 0]
+  }
   
   private setDrawProps(drawProps : DrawProps) {
-    Object.assign(this.ctx, drawProps)
+    const ctx = this.getLayerCtx(drawProps.layerIndex)
+    Object.assign(ctx, drawProps)
     
-    this.ctx.shadowBlur = drawProps.shadowBlur || 0
-    this.ctx.shadowColor = drawProps.shadowColor || null
+    ctx.shadowBlur = drawProps.shadowBlur || 0
+    ctx.shadowColor = drawProps.shadowColor || null
+
+    ctx.setLineDash([drawProps.lineDash || 0])
   }
 
   drawRect(drawCoords : DCoords, drawMode : DrawMode, drawProps : DrawProps = {}) {
+    const ctx = this.getLayerCtx(drawProps.layerIndex)
     this.setDrawProps(drawProps)
-
-    this.ctx.setLineDash([drawProps.lineDash || 0])
 
     drawCoords = this.convertCoordsToPixels(drawCoords)
     if (drawMode == DrawMode.Stroke || drawMode == DrawMode.StrokeAndFill) {
-      this.ctx.strokeRect(drawCoords.x, drawCoords.y, drawCoords.width, drawCoords.height)
+      ctx.strokeRect(drawCoords.x, drawCoords.y, drawCoords.width, drawCoords.height)
     }
     if (drawMode == DrawMode.Fill || drawMode == DrawMode.StrokeAndFill) {
-      this.ctx.fillRect(drawCoords.x, drawCoords.y, drawCoords.width, drawCoords.height)
+      ctx.fillRect(drawCoords.x, drawCoords.y, drawCoords.width, drawCoords.height)
     }
   }
 
-  drawImage(drawCoords : DCoords, image : HTMLImageElement) {
+  drawImage(drawCoords : DCoords, image : HTMLImageElement, layerIndex: number = 0) {
+    const ctx = this.getLayerCtx(layerIndex)
     drawCoords = this.convertCoordsToPixels(drawCoords)
-    this.ctx.drawImage(image, drawCoords.x, drawCoords.y, drawCoords.width, drawCoords.height)
+    ctx.drawImage(image, drawCoords.x, drawCoords.y, drawCoords.width, drawCoords.height)
   }
 
   drawRoundedRect(drawCoords : DCoords, drawMode : DrawMode, radius : number, drawProps : DrawProps = {}) {
+    const ctx = this.getLayerCtx(drawProps.layerIndex)
     this.setDrawProps(drawProps)
-
-    this.ctx.setLineDash([drawProps.lineDash || 0])
 
     drawCoords = this.convertCoordsToPixels(drawCoords)
     const radiusPixels = this.viewportInfo.coordPixelScale * radius
     
-    this.ctx.beginPath()
-    this.ctx.moveTo(drawCoords.x + radiusPixels, drawCoords.y)
-    this.ctx.lineTo(drawCoords.x + drawCoords.width - radiusPixels, drawCoords.y)
-    this.ctx.quadraticCurveTo(drawCoords.x + drawCoords.width, drawCoords.y, drawCoords.x + drawCoords.width, drawCoords.y + radiusPixels)
-    this.ctx.lineTo(drawCoords.x + drawCoords.width, drawCoords.y + drawCoords.height - radiusPixels)
-    this.ctx.quadraticCurveTo(drawCoords.x + drawCoords.width, drawCoords.y + drawCoords.height,
+    ctx.beginPath()
+    ctx.moveTo(drawCoords.x + radiusPixels, drawCoords.y)
+    ctx.lineTo(drawCoords.x + drawCoords.width - radiusPixels, drawCoords.y)
+    ctx.quadraticCurveTo(drawCoords.x + drawCoords.width, drawCoords.y, drawCoords.x + drawCoords.width, drawCoords.y + radiusPixels)
+    ctx.lineTo(drawCoords.x + drawCoords.width, drawCoords.y + drawCoords.height - radiusPixels)
+    ctx.quadraticCurveTo(drawCoords.x + drawCoords.width, drawCoords.y + drawCoords.height,
       drawCoords.x + drawCoords.width - radiusPixels, drawCoords.y + drawCoords.height)
-    this.ctx.lineTo(drawCoords.x + radiusPixels, drawCoords.y + drawCoords.height)
-    this.ctx.quadraticCurveTo(drawCoords.x, drawCoords.y + drawCoords.height, drawCoords.x, drawCoords.y + drawCoords.height - radiusPixels)
-    this.ctx.lineTo(drawCoords.x, drawCoords.y + radiusPixels)
-    this.ctx.quadraticCurveTo(drawCoords.x, drawCoords.y, drawCoords.x + radiusPixels, drawCoords.y)
-    this.ctx.closePath()
+    ctx.lineTo(drawCoords.x + radiusPixels, drawCoords.y + drawCoords.height)
+    ctx.quadraticCurveTo(drawCoords.x, drawCoords.y + drawCoords.height, drawCoords.x, drawCoords.y + drawCoords.height - radiusPixels)
+    ctx.lineTo(drawCoords.x, drawCoords.y + radiusPixels)
+    ctx.quadraticCurveTo(drawCoords.x, drawCoords.y, drawCoords.x + radiusPixels, drawCoords.y)
+    ctx.closePath()
 
     if (drawMode == DrawMode.Fill || drawMode == DrawMode.StrokeAndFill) {
-      this.ctx.fill()
+      ctx.fill()
     }
 
     if (drawMode == DrawMode.Stroke || drawMode == DrawMode.StrokeAndFill) {
-      this.ctx.stroke()
+      ctx.stroke()
     }
   }
 
@@ -156,41 +166,58 @@ export default class DCanvas {
       }).join(' ')
     }
     drawCoords = this.convertCoordsToPixels(drawCoords)
-
-    this.setDrawProps(drawProps)
-    
-    this.ctx.fillText(text, drawCoords.x, drawCoords.y)
+    const ctx = this.getLayerCtx(drawProps.layerIndex)
+    ctx.fillText(text, drawCoords.x, drawCoords.y)
   }
 
   drawCircle(drawCoords: DCoords, drawMode : DrawMode, drawProps: DrawProps = {}) {
+    const ctx = this.getLayerCtx(drawProps.layerIndex)
     this.setDrawProps(drawProps)
-
-    this.ctx.setLineDash([drawProps.lineDash || 0])
 
     drawCoords = this.convertCoordsToPixels(drawCoords)
     const radius = drawCoords.width / 2
 
-    this.ctx.beginPath()
-    this.ctx.moveTo(drawCoords.x + drawCoords.width, drawCoords.y + radius)
-    this.ctx.arc(drawCoords.x + radius, drawCoords.y + radius,
+    ctx.beginPath()
+    ctx.moveTo(drawCoords.x + drawCoords.width, drawCoords.y + radius)
+    ctx.arc(drawCoords.x + radius, drawCoords.y + radius,
       drawCoords.width / 2, 0, 2 * Math.PI)
-    this.ctx.closePath()
+    ctx.closePath()
 
     if (drawMode == DrawMode.Fill || drawMode == DrawMode.StrokeAndFill) {
-      this.ctx.fill()
+      ctx.fill()
     }
     if (drawMode == DrawMode.Stroke || drawMode == DrawMode.StrokeAndFill) {
-      this.ctx.stroke()
+      ctx.stroke()
     }
     
   }
 
-  clear() {
-    this.ctx.clearRect(0, 0, window.innerWidth, window.innerHeight)
+  drawPath(path : Path2D, drawCoords : DCoords, drawProps : DrawProps = {}, drawMode : DrawMode = DrawMode.Stroke) {
+    const ctx = this.getLayerCtx(drawProps.layerIndex)
+    this.setDrawProps(drawProps)
+
+    drawCoords = this.convertCoordsToPixels(drawCoords)
+
+    ctx.translate(drawCoords.x, drawCoords.y)
+    if (drawMode === DrawMode.StrokeAndFill || drawMode === DrawMode.Stroke) {
+      ctx.stroke(path)
+    }
+    if (drawMode === DrawMode.StrokeAndFill || drawMode == DrawMode.Fill) {
+      ctx.fill(path)
+    }
+    ctx.translate(-drawCoords.x, -drawCoords.y)
   }
 
-  clearRect(drawCoords : DCoords) {
+  clear(layerIndex : number = null) {
+    if (layerIndex !== null) {
+      this.getLayerCtx(layerIndex).clearRect(0, 0, window.innerWidth, window.innerHeight)
+    } else {
+      this.ctxs.forEach(v => v.clearRect(0, 0, window.innerWidth, window.innerHeight))
+    }
+  }
+
+  clearRect(drawCoords : DCoords, layerIndex : number) {
     drawCoords = this.convertCoordsToPixels(drawCoords)
-    this.ctx.clearRect(drawCoords.x, drawCoords.y, drawCoords.width, drawCoords.height)
+    this.getLayerCtx(layerIndex).clearRect(drawCoords.x, drawCoords.y, drawCoords.width, drawCoords.height)
   }
 }

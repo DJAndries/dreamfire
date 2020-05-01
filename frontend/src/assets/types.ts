@@ -1,6 +1,7 @@
 export enum AssetType {
   Image,
-  Audio
+  Audio,
+  Text
 }
 
 export interface Asset {

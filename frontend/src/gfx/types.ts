@@ -9,6 +9,7 @@ export interface DrawProps {
   lineDash? : number,
   font? : string,
   textAlign? : string,
+  layerIndex? : number,
   [key: string]: any
 }
 

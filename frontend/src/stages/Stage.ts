@@ -9,5 +9,5 @@ export default interface Stage {
 
   onMouseEvent(ev : CanvasMouseEvent) : void
 
-  onKeyboardEvent(ev : KeyboardEvent) : void
+  onKeyboardEvent(ev : KeyboardEvent, isDown : boolean) : void
 }

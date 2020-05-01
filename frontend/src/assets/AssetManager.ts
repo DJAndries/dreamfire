@@ -9,11 +9,13 @@ export default class AssetManager {
   
   onProgress : (loaded : number, total : number) => void
 
-  constructor(assets : object) {
+  constructor(assets : object, onPreload : () => void, onProgress : (loaded : number, total : number) => void) {
+    this.onPreload = onPreload
+    this.onProgress = onProgress
     for (const value of Object.values(assets)) {
       const asset : Asset = value
       asset.noPreload = value.noPreload || false
-      if (asset.noPreload) {
+      if (!asset.noPreload) {
         this.totalPreloadAssets++
       }
       this.initData(asset)
@@ -47,6 +49,15 @@ export default class AssetManager {
     asset.data = img
   }
 
+  private initText(asset: Asset) {
+    fetch(asset.url).then((result) => {
+      result.text().then((text) => {
+        asset.data = text
+        this.assetPreloaded()
+      })
+    })
+  }
+
   private initData(asset: Asset) {
     switch (asset.type) {
       case AssetType.Audio:
@@ -54,6 +65,9 @@ export default class AssetManager {
         break
       case AssetType.Image:
         this.initImage(asset)
+        break
+      case AssetType.Text:
+        this.initText(asset)
         break
     }
   }
