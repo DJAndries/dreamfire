@@ -55,6 +55,9 @@ export default class DreamfireGame {
   }
 
   keyboardHandler(ev : KeyboardEvent, isDown : boolean) {
+    if (ev.repeat) {
+      return
+    }
     this.baseCtx.currentStage.onKeyboardEvent(ev, isDown)
   }
 
