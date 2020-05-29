@@ -6,8 +6,11 @@ export default class KeyframeEffect implements Effect {
 
   keyframeIndex : number
 
-  constructor(keyframes : any[]) {
+  constructor(keyframes : any[], keyframeCount : number = null) {
     this.keyframes = keyframes
+    if (keyframeCount !== null) {
+      this.keyframes = Array.from(new Array(keyframeCount).keys())
+    }
     this.keyframeIndex = 0
   }
 

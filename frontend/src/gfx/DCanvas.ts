@@ -121,9 +121,17 @@ export default class DCanvas {
     }
   }
 
-  drawImage(drawCoords : DCoords, image : HTMLImageElement, layerIndex: number = 0) {
+  drawImage(drawCoords : DCoords, image : HTMLImageElement, layerIndex: number = 0,
+    localCoords : DCoords = null) {
+
     const ctx = this.getLayerCtx(layerIndex)
+    this.setDrawProps({})
     drawCoords = this.convertCoordsToPixels(drawCoords)
+    if (!!localCoords) {
+      ctx.drawImage(image, localCoords.x, localCoords.y, localCoords.width, localCoords.height, drawCoords.x, drawCoords.y,
+        drawCoords.width, drawCoords.height)
+      return
+    }
     ctx.drawImage(image, drawCoords.x, drawCoords.y, drawCoords.width, drawCoords.height)
   }
 
@@ -165,6 +173,7 @@ export default class DCanvas {
         return v
       }).join(' ')
     }
+    this.setDrawProps(drawProps)
     drawCoords = this.convertCoordsToPixels(drawCoords)
     const ctx = this.getLayerCtx(drawProps.layerIndex)
     ctx.fillText(text, drawCoords.x, drawCoords.y)
