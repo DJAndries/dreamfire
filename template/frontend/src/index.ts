@@ -7,7 +7,7 @@ import GameStore from './state/GameStore'
 import { joinGameOp, playersChangedSubOp } from './comm/game_ops'
 import PlayerDef from 'models/PlayerDef'
 
-const API_HOST = process.env.NODE_ENV === 'production' ? 'api.funnyfarm.andries.ca' : 'localhost:4001'
+const API_HOST = process.env.NODE_ENV === 'production' ? 'api.yourdomain.com' : 'localhost:4001'
 
 class Game extends DreamfireGame {
 

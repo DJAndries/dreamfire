@@ -5,7 +5,7 @@ import BlokusGameDef from 'models/GameDef'
 export const joinGameOp = (ctx : GameContext, gameName : string, playerName : string) : Promise<BlokusGameDef> => {
   return ctx.commClient.client.mutate({
     mutation: gql`mutation joinGame($gameName : String, $playerName : String) {
-      gameJoinGame(gameName: $gameName, playerName: $playerName) {
+      tempJoinGame(gameName: $gameName, playerName: $playerName) {
         gameName
         players {
           id
@@ -19,7 +19,7 @@ export const joinGameOp = (ctx : GameContext, gameName : string, playerName : st
       playerName
     }
   }).then((result) => {
-    return result.data.gameJoinGame
+    return result.data.tempJoinGame
   })
 }
 
@@ -27,7 +27,7 @@ export const playersChangedSubOp = (ctx : GameContext) : Observable<any> => {
   return new Observable<any>((observer) => {
     ctx.commClient.client.subscribe({
       query: gql`subscription {
-        gamePlayersChanged {
+        tempPlayersChanged {
           players {
             id
             name
@@ -36,7 +36,7 @@ export const playersChangedSubOp = (ctx : GameContext) : Observable<any> => {
         }
       }`
     }).subscribe((v) => {
-      observer.next(v.data.gamePlayersChanged)
+      observer.next(v.data.tempPlayersChanged)
     })
   })
 }

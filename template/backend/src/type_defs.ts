@@ -2,7 +2,7 @@ import { gql } from 'dreamfire-backend/util'
 
 const typeDefs = gql`
   type Subscription {
-    gamePlayersChanged: Game
+    tempPlayersChanged: Game
   }
 
   type Player {

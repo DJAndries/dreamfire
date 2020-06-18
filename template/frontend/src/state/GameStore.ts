@@ -1,13 +1,13 @@
-import BlokusGameDef from "models/GameDef"
+import GameDef from "models/GameDef"
 import PlayerDef from "models/PlayerDef"
 import { Observable } from "dreamfire-frontend/util"
 
 export default class GameStore {
 
-  gameDef : BlokusGameDef
+  gameDef : GameDef
 
   me : PlayerDef
 
-  playersChangedSub : Observable<BlokusGameDef>
+  playersChangedSub : Observable<GameDef>
 
 }

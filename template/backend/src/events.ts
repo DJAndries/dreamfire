@@ -1,6 +1,6 @@
 import { FilterFn } from 'dreamfire-backend/pubsub'
 
-export const PLAYERS_CHANGED = 'gamePlayersChanged'
+export const PLAYERS_CHANGED = 'tempPlayersChanged'
 
 export const gameSubFilter = (eventName : string) : FilterFn => (payload, args, context) => {
   if (!context.userId) {
