@@ -4,12 +4,16 @@
   "description": "Backend functionality for dreamfire framework",
   "main": "index.js",
   "scripts": {
-    "build": "rm -rf ./dist && tsc && cp ./package.json ./dist/",
+    "build": "rm -rf ./dist && tsc && cp ./package.json ./dist/ && cp ./README.md ./dist/",
     "build:dev": "tsc && cp ./package.json ./dist/"
   },
   "files": [
     "**/*.js"
   ],
+  "repository": {
+    "type" : "git",
+    "url" : "https://github.com/DJAndries/dreamfire.git"
+  },
   "author": "Darnell Andries",
   "license": "MIT",
   "dependencies": {
