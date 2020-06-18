@@ -69,3 +69,4 @@ Make as many games as you want, all hosted under a single HTTPS port! The gatewa
   - `npm install dreamfire-gateway` in the `gateway` folder
   - `npm install dreamfire-backend` in the `backend` folder
 3. Start all three projects
+4. Append `?u=Bob&g=Group` to the frontend URL. In the predefined template, `u` is parsed as the username and `g` is parsed as the group name.
