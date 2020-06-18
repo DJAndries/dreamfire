@@ -6,6 +6,8 @@
   Spartan, browser-based, multiplayer-ready, full stack game framework. Communications over GraphQL.
 </p>
 
+Used to create the games on (funnyfarm)[https://funnyfarm.andries.ca].
+
 ## Features
 
 ### GraphQL + Websocket communications
